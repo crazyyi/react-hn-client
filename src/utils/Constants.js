@@ -1,0 +1,1 @@
+export const UPDATES_CACHE_SIZE = 500;
