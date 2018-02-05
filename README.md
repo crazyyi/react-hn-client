@@ -1,5 +1,5 @@
 
-This is a HackerNews clone built with create-react-app.
+This is a HackerNews clone built with create-react-app. A live demo is available here: https://hnreactclone.herokuapp.com
 
 Most work is done in client side. There is not much in server side. 
 
