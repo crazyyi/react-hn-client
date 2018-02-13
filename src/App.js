@@ -6,46 +6,33 @@ import UserProfile from './components/UserProfile';
 import Story from './components/Story';
 import _ from 'underscore';
 import {parse} from 'qs';
-import {fetchStoriesUsingTopStoryIDs, fetchItemDetail, getUserProfile} from './HNService'
+import {fetchFromURL, fetchItemDetail, getUserProfile} from './HNService'
+import { AMOUNT_TO_ADD } from './utils/Constants';
 
 class Container extends Component {
-  state = {startIndex: 0, endIndex: 15, page: 1, topStoryIDs: [], rowsData: [], isLoading: true};
+  state = {startIndex: 0, endIndex: 15, page: 1, rowsData: [], isLoading: true};
 
-  amountToAdd = 15;
-
-  getTopics(apiQuery, page, startIndex, before) {
-    fetch(apiQuery)
-    .then(res => res.json())
-    .then(topStoryIDs => {
-      const middle = Date.now();
-      console.log(middle - before + 'ms');
+  getTopics(apiQuery, page, startIndex) {
+    fetchFromURL(apiQuery, page, startIndex, (rowsData) => {
       this.setState(() => {
         return {
           startIndex: startIndex,
-          endIndex: startIndex + this.amountToAdd,
-          page: page,
-          topStoryIDs: topStoryIDs
+          endIndex: startIndex + AMOUNT_TO_ADD,
+          rowsData: rowsData, 
+          isLoading: false,
+          page: page
         }
-      });
-      fetchStoriesUsingTopStoryIDs(topStoryIDs, startIndex, this.amountToAdd).then((rowsData) => {
-        this.setState({rowsData: rowsData, isLoading: false});
-        const current = Date.now() - middle;
-        console.log(current + 'ms');
-      });
+      })
     });
   }
 
   componentDidMount() {
-    console.log('url: ' + this.props.url);
     const {startIndex, page} = this.state;
-    console.log('did mount page ' + page);
-    const before = Date.now();
-    this.getTopics(this.props.url, page, startIndex, before);
+    this.getTopics(this.props.url, page, startIndex);
   }
 
   componentWillReceiveProps(nextProps) {
     const query = parse(this.props.history.location.search.substr(1));
-    console.log(query);
     let startIndex = this.state.startIndex;
     let page = this.state.page;
 
@@ -63,14 +50,12 @@ class Container extends Component {
     }
 
     this.setState({isLoading: true});
-    console.log('page ' + page);
-    this.getTopics(nextProps.url, page, startIndex, Date.now());
+    this.getTopics(nextProps.url, page, startIndex);
   }
 
   render() {
     const {rowsData, startIndex, page, isLoading} = this.state;
     const {match} = this.props;
-    console.log('isLoading list:' + isLoading);
 
     let prev, separator;
 

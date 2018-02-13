@@ -1,9 +1,8 @@
 import api from './network/api';
+import {AMOUNT_TO_ADD} from './utils/Constants';
 
 export function fetchStoriesUsingTopStoryIDs(topStoryIDs, startIndex, amountToAdd) {
     const rowsData = [];
-    // const endIndex = (startIndex + amountToAdd) < topStoryIDs.length ? (startIndex + amountToAdd) : topStoryIDs.length;
-
     let before = Date.now();
     console.log('startIndex:' + startIndex);
     const array = topStoryIDs.slice(startIndex, startIndex + amountToAdd);
@@ -12,7 +11,6 @@ export function fetchStoriesUsingTopStoryIDs(topStoryIDs, startIndex, amountToAd
         fetch(api.HN_ITEM_ENDPOINT + id + '.json')
         .then(res => res.json())
         .then(topStory => {
-          // topStory.count = startIndex + 1;
           rowsData.push(topStory);
           startIndex++;
           const elapsed = (Date.now() - before);
@@ -47,4 +45,13 @@ export function getUserProfile(id) {
   .then(response => {
     return response;
   });
+}
+
+export function fetchFromURL(apiQuery, page, startIndex, callback) {
+  return fetch(apiQuery)
+    .then(res => res.json())
+    .then(topStoryIDs => fetchStoriesUsingTopStoryIDs(topStoryIDs, startIndex, AMOUNT_TO_ADD))
+    .then(rowsData => {
+      callback(rowsData);
+    });
 }
